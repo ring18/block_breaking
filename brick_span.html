@@ -1,0 +1,174 @@
+<!DOCTYPE html><!--画面サイズに合わせてキャンバスのサイズを変えるの-->
+<html>
+<head>
+	<meta charset = "utf-8">
+	<title>brick_breaking</title>
+
+
+	<!--head内にはさむ, はじめ-->
+	<style>
+            #main{
+                position:fixed;
+                width:100%;
+                height:100%;
+                z-index:20;
+            }
+            #body {
+                position:absolute;
+                z-index: 10;
+            }
+	</style>
+	<!--head内にはさむ, おわり-->
+
+
+</head>
+
+
+<!--<body>直下にはさむ、はじめ-->
+<body>
+<canvas id="main"></canvas>
+        <!--canvas を1つ生成-->
+<section id = "body">
+<!--<body>直下にはさむ、おわり-->
+
+
+<!--テスト用テキスト-->
+<p>横の文字が消えます→<span id = "_0">あ</span> <span id="_1">い</span> <span id="_2">う</span> <span id="_3">え</span> <span id="_4">お</span><span id = "_5">あ</span> <span id="_6">い</span> <span id="_7">う</span> <span id="_8">え</span> <span id="_9">お</span></p>
+
+<!--</body>の直前にはさむ、はじめ-->
+
+	<script  type="text/javascript">
+
+		var canvas = document.getElementById("main");
+	    var ctx = canvas.getContext("2d");
+	    var x;
+		var y;//開始位置を中央下端に定義
+		var dx=2;
+		var dy=-2;//動いているように見せる
+		var ballRadius = 8;
+		var paddleHeight = 10;
+		var paddleWidth = 75;
+		var paddleX;
+		var rightPressed = false;
+		var leftPressed = false;
+		
+		document.addEventListener("keydown", keyDownHandler, false);
+		document.addEventListener("keyup",keyUpHandler, false);
+		document.addEventListener("mousemove", mouseMoveHandler,false);
+
+		function mouseMoveHandler(e){
+			var relativeX = e.clientX - canvas.offsetLeft;
+			if(relativeX > 0 && relativeX < canvas.width){
+				paddleX = relativeX - paddleWidth/2;
+			}
+		}
+		function keyDownHandler(e){
+			if(e.key == "Right" || e.key == "ArrowRight"){
+				rightPressed = true;
+			}
+			else if(e.key =="Left" || e.key == "ArrowLeft"){
+				leftPressed = true;
+			}
+		}
+
+		function keyUpHandler(e){
+			if(e.key == "Right" || e.key == "ArrowRight"){
+				rightPressed = false;
+			}
+			else if (e.key == "Left" || e.key == "ArrowLeft"){
+				leftPressed = false;
+			}
+		}
+		//衝突検出span用
+		function collisionDetection(){
+			var sbrick=[];
+	        sbrick = document.elementsFromPoint(x,y);
+	        var c=0;
+	        while(sbrick[c]!=null){
+		        if(sbrick[c]=="[object HTMLSpanElement]"&&sbrick[c].id!="diminished"){
+		            sbrick[c].id = "diminished";
+		            sbrick[c].style.opacity=0;
+		            dy=-dy;
+		        }
+		        c++;
+		    }
+	    }
+
+
+		window.onload = function() {
+	    function fitCanvasSize() {
+      // Canvas のサイズをクライアントサイズに合わせる
+	      canvas.width = document.documentElement.clientWidth;
+	      canvas.height = document.documentElement.clientHeight;
+	      x = canvas.width/2;
+	      y = canvas.height-30;
+	      paddleX = (canvas.width-paddleWidth)/2;
+	      // Canvas 全体を塗りつぶし
+	      setInterval(draw,10);
+	     }
+	     fitCanvasSize();
+    	window.onresize = fitCanvasSize;
+	  	}
+
+
+	  	function drawball(){
+	  		ctx.beginPath();
+	  		ctx.arc(x,y,ballRadius,0,Math.PI*2);
+	  		ctx.fillStyle = "#0095DD";
+	  		ctx.globalCompositeOperation = 'source-over';
+	  		ctx.fill();
+	  		ctx.closePath();
+	  	}
+
+	  	function drawPaddle(){
+	  		ctx.beginPath();
+	  		ctx.rect(paddleX, canvas.height-paddleHeight,paddleWidth, paddleHeight);
+	  		ctx.fillStyle = "#0095DD";
+	  		ctx.globalCompositeOperation = 'source-over';
+	  		ctx.fill();
+	  		ctx.closePath();
+	  	}
+
+	  	function draw(){
+	  		ctx.clearRect(0,0,canvas.width,canvas.height);
+	  		drawball();
+	  		drawPaddle();
+	  		collisionDetection();
+	  		if(x+dx>canvas.width-ballRadius || x+dx<ballRadius){
+				dx=-dx;
+			}
+
+			if(y+dy<ballRadius){
+				dy=-dy;
+			}else if(y+dy > canvas.height-ballRadius){
+				if(x>paddleX && x<paddleX+paddleWidth){
+					dy=-dy;
+				}
+				else{
+					alert("GAME OVER");
+					x = canvas.width/2;
+	      			y = canvas.height-30;
+	      			dx=-dx;
+	      			dy=-dy;
+				}
+			}
+
+			//パドル操作
+			if(rightPressed && paddleX < canvas.width-paddleWidth){
+				paddleX += 7;
+			}
+			else if(leftPressed && paddleX>0){
+				paddleX-=7;
+			}
+			x += dx;
+			y += dy;
+
+	  	}	    
+	</script>
+</section>
+<!--</body>の直前にはさむ、おわり-->
+
+
+
+</body>
+</html>
