@@ -12,6 +12,7 @@ binmode STDOUT, ":utf8";
 my $inp = join "", <STDIN>;
 
 #コメントウザいので抜く
+#これやばいかもしれないのでちょっと考え直します
 $inp =~ s/<!--.*?-->//sg;
 
 #エンコードがらみの話 utf8へ
@@ -169,9 +170,11 @@ my $const_st3 = <<'EOS';
 </section>
 
 EOS
+my $const_st4 = '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+';
 
 $inp =~ s;</head>;$const_st1</head>;s;
-$inp =~ s/(<meta(.*?) charset=)(.*?)>/$1UTF-8>/s;
+$inp =~ s/(<meta(.*?) charset=)(.*?)>/$const_st4/s;
 $inp =~ m;(.*?)<body(.*?)>(.*?)</body>(.*?);s;
 
 my ($st1, $st2, $st3, $st4) = ($1, $2, $3, $4);
