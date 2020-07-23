@@ -18,13 +18,13 @@ $inp =~ s/<!--.*?-->//sg;
 #エンコードがらみの話 utf8へ
 my $const_st1 = <<'EOS';
 <style>
-    #main{
+    #_main{
         position:fixed;
         width:100%;
         height:100%;
         z-index:20;
     }
-    #body {
+    #_body {
         position:absolute;
         z-index: 10;
     }
@@ -33,8 +33,8 @@ my $const_st1 = <<'EOS';
 EOS
 my $const_st2 = <<'EOS';
 
-<canvas id="main"></canvas>
-<section id = "body">
+<canvas id="_main"></canvas>
+<section id = "_body">
 
 EOS
 
@@ -42,7 +42,7 @@ my $const_st3 = <<'EOS';
 
 <script  type="text/javascript">
 
-    var canvas = document.getElementById("main");
+    var canvas = document.getElementById("_main");
     var ctx = canvas.getContext("2d");
     var x;
     var y;//開始位置を中央下端に定義
@@ -170,8 +170,7 @@ my $const_st3 = <<'EOS';
 </section>
 
 EOS
-my $const_st4 = '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-';
+my $const_st4 = '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">';
 
 $inp =~ s;</head>;$const_st1</head>;is;
 $inp =~ s/(<meta(.*?) charset=)(.*?)>/$const_st4/is;
@@ -185,7 +184,7 @@ if ($st1 !~ /<!DOCTYPE/){
     $st1 = "<!DOCTYPE html>\n".$st1;
 }
 
-my $ret = "$st1"."<body"."$st2".">"."$st3"."</body>"."$st4"."\n</html>";
+my $ret = "\n"."$st1"."<body"."$st2".">"."$st3"."</body>"."$st4"."\n</html>";
 
 $ret =~ s/(<body(.*?)>)/$1$const_st2/is;
 $ret =~ s;</body>;$const_st3</body>;is;
@@ -201,20 +200,29 @@ sub tag_sandwitcher {
     state $cnt = 0;
     my $st = shift;
     my $ret;
+    $st =~ s/<span(.*?)>/<_span$1>/sig;
+    $st =~ s;</span(.*?)>;<_/span$1>;sig;
+    $st =~ s/<script(.*?)>/<_script$1>/sig;
+    $st =~ s;</script(.*?)>;<_/script$1>;sig;
+    $st =~ s/<xmp(.*?)>/<_xmp$1>/sig;
+    $st =~ s;</xmp(.*?)>;<_/xmp$1>;sig;
     @_ = split //,$st;
-    #入れ子を飛ばすためのフラグ
+    #タグを飛ばすためのフラグ 1 -> <>のなか 2 -> &;のなか 4->scriptタグとかの中
     my $f = 0;
     for (my $i = 0; $i < length($st); $i++) {
         if($_[$i] =~ /[<>]/){
-            #入れ子発見
+            #タグ発見
             $f ^= 1;
+            if($_[$i] eq '<' and $_[$i + 1] eq '_'){
+                $f ^= 4;
+            }
             $ret .= $_[$i];
-        } elsif (($_[$i] eq '&') and !($f & 1)){
+        } elsif (($_[$i] eq '&') and !($f & 1) and !($f & 4)){
             #特殊文字処理
             $ret .= '<span id="_'."$cnt".'">'.'&';
             $cnt += 1;
             $f ^= 2;
-        } elsif (($f & 2) and !($f & 1)){
+        } elsif (($f & 2) and !($f & 1) and !($f & 4)){
             #特殊文字処理
             if ($_[$i] eq ';') {
                 $ret .= ';'.'</span>';
@@ -222,16 +230,18 @@ sub tag_sandwitcher {
             } else {
                 $ret .= $_[$i]
             }
-        } elsif(($_[$i] =~ /\s/) or ($f & 1)){
-            #空白には当たり判定いらないので あと入れ子のタグはそのまま
+        } elsif(($_[$i] =~ /\s/) or ($f & 1) or ($f & 4)){
+            #空白には当たり判定いらないので 
             $ret .= $_[$i]
-        } elsif(!($f & 1)) {
+        } elsif(!($f & 1) ) {
             #id="1"とか安直なのは衝突あるかもなので避ける
             #古代のブラウザは_よめないかもしれんけどまあ無視
             $ret .= '<span id="_'."$cnt".'">'."$_[$i]".'</span>';
             $cnt += 1;
         }
     }
+    $ret =~ s/<_(.*?)>/<$1>/sig;
     return $ret;
 }
+
 
