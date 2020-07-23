@@ -21,7 +21,7 @@ MANPAGES = ffproxy.8 ffproxy.conf.5 ffproxy.quick.7
 SMANPAGES = ffproxy.8.s ffproxy.conf.5.s ffproxy.quick.7.s
 
 MY_DBFILES=db/access.dyndns db/access.host db/access.ip db/filter.header.add db/filter.header.drop db/filter.header.entry db/filter.header.match db/filter.host.match db/filter.rheader.drop db/filter.rheader.entry db/filter.rheader.match db/filter.url.match
-MY_HTMLFILES=html/connect html/filtered html/invalid html/post html/resolve html/const_st html/const_st2
+MY_HTMLFILES=html/connect html/filtered html/invalid html/post html/resolve 
 
 sysconfdir=${prefix}/etc
 datadir=${prefix}/share
